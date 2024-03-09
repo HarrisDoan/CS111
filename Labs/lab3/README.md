@@ -1,0 +1,159 @@
+A# Hash Hash Hash
+
+Name: Harris Doan
+UID: 605317270
+
+TODO introduction
+The objective of this lab was to enhance the performance of our hash tbale by emplying threading. The introduction of threads can lead to things such as race conditions, necessitating the need for implementing locks and mutual exclusion zones to safeguard against data loss. This lab we will work with locks to enhance a base hash table to perform even better.
+
+
+## Building
+```shell
+TODO
+To build the program, you run the command 'make'
+```
+
+## Running
+```shell
+TODO how to run and results
+
+'./hash-table-tester'
+'./hash-table-tester -t 8 -s 50000'
+'python3 -m unittest'
+
+Running ./hash-table-tester without the added parameters yielded this result:
+
+Generation: 18,812 usec
+Hash table base: 30,951 usec
+  - 0 missing
+Hash table v1: 141,200 usec
+  - 0 missing
+Hash table v2: 16,051 usec
+  - 0 missing
+
+Running ./hash-table-tester -t 8 -s 50000 with the added parameters yielded this result:
+
+Generation: 70,9640 usec
+Hash table base: 800,997 usec
+  - 0 missing
+Hash table v1: 1,535,908 usec
+  - 0 missing
+Hash table v2: 349,261 usec
+  - 0 missing
+
+From the spec you can use python -m unittest, however since we are testing on the Linux Server and the UTM VM, we have to use python3 instead of python. Using python3 -m unittest:
+
+
+.Running tester code 1...
+.Running tester code 2...
+.Running tester code 3...
+.
+----------------------------------------------------------------------
+Ran 3 tests in 12.609s
+
+OK
+```
+
+## First Implementation
+In the `hash_table_v1_add_entry` function, I added TODO
+
+In the initial version, ensuring thread safety was managed through the use of a solitary mutex which was added to 'hash_table_v1_add_entry'. The method `hash_table_v1_add_entry` has been upgraded to an atomic function. This guarantees the absence of any inconsistent states by allowing only one thread to make modifications to the hash table at any given moment. The mutex is both initialized and terminated concurrently with the hash map, presenting a straightforward strategy for handling this issue.
+
+### Performance
+```shell
+TODO how to run and results
+```
+Version 1 is a little slower/faster than the base version. As TODO
+
+1.) ./hash-table-tester -t 4 -s 100000
+Generation: 132,099 usec
+Hash table base: 1,423,963 usec
+  - 0 missing
+Hash table v1: 2,246,140 usec
+  - 0 missing
+Hash table v2: 776,830 usec
+  - 0 missing
+
+
+2.) ./hash-table-tester -t 8 -s 50000
+Generation: 70,9640 usec
+Hash table base: 800,997 usec
+  - 0 missing
+Hash table v1: 1,535,908 usec
+  - 0 missing
+Hash table v2: 349,261 usec
+  - 0 missing
+
+## Second Implementation
+In the `hash_table_v2_add_entry` function, I TODO
+
+In the second version, each bucket was allocated its own mutex, enabling simultaneous access to different buckets by multiple threads. These mutexes are instantiated at the same time as the hash table. When a specific bucket is being accessed, its corresponding mutex is locked. This approach ensures atomic operations on individual buckets and eliminates the risk of deadlocks, significantly enhancing performance efficiency. Version 2 implements a more detailed locking mechanism by assigning a mutex to each bucket within the hash table, permitting several threads to work on distinct buckets at the same time. On the other hand, version 1 employs a single mutex across the whole table, resulting in threads being queued even when their operations do not conflict. This refined approach in version 2 diminishes conflicts over resources, improves parallel processing, and consequently boosts performance on systems with multiple cores. This is why when we change from -t 4 to -t 8 and etc. we can see varying performances.
+
+### Performance
+```shell
+TODO how to run and results
+'./hash-table-tester -t 8 -s 50000'
+```
+
+TODO more results, speedup measurement, and analysis on v2
+
+Run 1:
+Generation: 76,953 usec
+Hash table base: 1,103,420 usec
+  - 0 missing
+Hash table v1: 1,503,000 usec
+  - 0 missing
+Hash table v2: 341,672 usec
+  - 0 missing
+
+Run 2:
+Generation: 71,826 usec
+Hash table base: 1,163,492 usec
+  - 0 missing
+Hash table v1: 1,535,211 usec
+  - 0 missing
+Hash table v2: 481,804 usec
+  - 0 missing
+
+Run 3:
+Generation: 71,343 usec
+Hash table base: 1,098,684 usec
+  - 0 missing
+Hash table v1: 1,526,329 usec
+  - 0 missing
+Hash table v2: 347,680 usec
+  - 0 missing
+
+Run 4:
+Generation: 71,203 usec
+Hash table base: 1,054,650 usec
+  - 0 missing
+Hash table v1: 1,523,567 usec
+  - 0 missing
+Hash table v2: 360,343 usec
+  - 0 missing
+
+Run 5:
+Generation: 71,530 usec
+Hash table base: 1,106,010 usec
+  - 0 missing
+Hash table v1: 1,552,131 usec
+  - 0 missing
+Hash table v2: 394,392 usec
+  - 0 missing
+
+Across the five runs, 
+the base case average was: 1,105,251 usec
+
+the Hash table v2 average was: 385,178 usec
+
+1,105,251 / 385,178 -> 2.86945516099
+
+There was a 2.87x improverment, which was almost a 3x performance improvement, from the base.
+
+
+## Cleaning up
+```shell
+TODO how to clean
+To clean it all up, just run 'make clean'
+```
